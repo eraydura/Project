@@ -223,15 +223,6 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
-
-crnn = CRNN(num_chars, rnn_hidden_size=rnn_hidden_size)
-crnn.apply(weights_init)
-crnn = crnn.to(device)
-
-text_batch_logits = crnn(image_batch.to(device))
-print(text_batch)
-print(text_batch_logits.shape)
-
 criterion = nn.CTCLoss(blank=0)
 
 
@@ -244,8 +235,6 @@ def encode_text_batch(text_batch):
     text_batch_targets = torch.IntTensor(text_batch_targets)
 
     return text_batch_targets, text_batch_targets_lens
-
-results_test.head()
 
 def remove_duplicates(text):
     if len(text) > 1:
@@ -282,21 +271,20 @@ def compute_loss(text_batch, text_batch_logits):
                                        dtype=torch.int32).to(device) # [batch_size]
     text_batch_targets, text_batch_targets_lens = encode_text_batch(text_batch)
     loss = criterion(text_batch_logps, text_batch_targets, text_batch_logps_lens, text_batch_targets_lens)
-
     return loss
-
-compute_loss(text_batch, text_batch_logits)
 
 num_epochs = 50
 lr = 0.001
 weight_decay = 1e-3
 clip_norm = 5
 
-optimizer = optim.Adam(crnn.parameters(), lr=lr, weight_decay=weight_decay)
-lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, verbose=True, patience=5)
+
 crnn = CRNN(num_chars, rnn_hidden_size=rnn_hidden_size)
 crnn.apply(weights_init)
 crnn = crnn.to(device)
+optimizer = optim.Adam(crnn.parameters(), lr=lr, weight_decay=weight_decay)
+lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, verbose=True, patience=5)
+
 epoch_losses = []
 iteration_losses = []
 num_updates_epochs = []
@@ -364,12 +352,7 @@ print(test_accuracy)
 
 
 mistakes_df = results_test[results_test['actual'] != results_test['prediction_corrected']]
-mask = mistakes_df['prediction_corrected'].str.len() == 5
-mistake_image_fp = os.path.join(data_path, mistakes_df[mask]['actual'].values[0] + ".png")
-
-mistake_image = Image.open(mistake_image_fp)
-plt.imshow(mistake_image)
-plt.show()
+print(mistakes_df)
 
 
 
