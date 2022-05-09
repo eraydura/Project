@@ -320,20 +320,9 @@ for epoch in tqdm(range(1, num_epochs + 1)):
     epoch_losses.append(epoch_loss)
     num_updates_epochs.append(num_updates_epoch)
     lr_scheduler.step(epoch_loss)
-
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
-
-ax1.plot(epoch_losses)
-ax1.set_xlabel("Epochs")
-ax1.set_ylabel("Loss")
-
-ax2.plot(iteration_losses)
-ax2.set_xlabel("Iterations")
-ax2.set_ylabel("Loss")
-
-plt.show()
-
+    # TensorBoard
+    writer.add_scalar('Loss', epoch_loss, epoch)
+    writer.add_scalar('Accuracy', accuracy, epoch)
 
 
 with torch.no_grad():
