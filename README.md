@@ -1,2 +1,2 @@
-# project
-###### References
+# RECCURENT NEURAL NETWORK IN V-VAD
+
