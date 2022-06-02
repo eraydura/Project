@@ -22,6 +22,7 @@ class Trainer(nn.Module):
         train_loss, train_correct = 0.0, 0.0
         num_batches = len(self.train_dataloader)
         size = len(self.train_dataloader.dataset)
+        # Sets model to train mode
         self.model.train()
         for _, (X, y) in enumerate(self.train_dataloader):
             X = X.to(self.device)
@@ -29,21 +30,23 @@ class Trainer(nn.Module):
 
             y = y.type(torch.LongTensor).to(self.device)
 
-            # Compute prediction error
+            # Makes predictions
             pred = self.model(X)
             pred_target = pred.argmax(1)
 
+            # Computes loss
             loss_arr = []
             for i in range(y.shape[1]):
                 loss = self.loss_fn(pred, y[:,i])
                 loss_arr.append(loss)
                 train_correct += torch.sum(pred_target == y[:,i]).item()
 
-            # Backpropagation
+            # Computes gradients
             self.optimizer.zero_grad()
             for i in range(y.shape[1]):
-                # Backpropagation
                 loss_arr[i].backward(retain_graph=True)
+                
+            # Updates parameters and zeroes gradients
             self.optimizer.step()
 
             train_loss += sum(loss_arr) / len(loss_arr)
@@ -87,6 +90,7 @@ class Trainer(nn.Module):
             print(f"Epoch {t}/{self.epochs}", end="\r")
             train_loss, train_correct = self._step_train()
             val_loss, val_correct = self._step_val()
+            #Tensorboard
             self.writer.add_scalar('train_loss', train_loss, t)
             self.writer.add_scalar('val_loss', val_loss, t)
             self.writer.add_scalar('train_acc', train_correct, t)
