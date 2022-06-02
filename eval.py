@@ -1,4 +1,3 @@
-from turtle import color
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -17,6 +16,8 @@ class Eval():
     def eval(self):
         size = len(self.test_dataloader.dataset)
         correct = 0
+        minCorrect = 999999
+        maxCorrect = 0
 
         self.model.eval()
         with torch.no_grad():
@@ -36,14 +37,43 @@ class Eval():
 
                     self._preds = np.append(self._preds, pred_target.cpu().numpy())
 
+                if correct > maxCorrect:
+                    maxCorrect = correct
+                    best_pred = self._preds
+                    best_gts = self._gts
+
+                if correct < minCorrect:
+                    minCorrect = correct
+                    worst_pred = self._preds
+                    worst_gts = self._gts
+
+
             gts = self._gts
             preds = self._preds
 
+            #all ground truth and prediction
             plt.figure(figsize=(10, 5))
             plt.plot(gts, label='ground truth')
             plt.plot(preds, label='prediction')
             plt.legend()
             plt.show()
+
+            #best predictions
+            plt.figure(figsize=(10, 5))
+            plt.plot(best_pred, label='best_pred')
+            plt.plot(best_gts, label='best_gts')
+            plt.legend()
+            plt.show()
+
+            #worst predictions
+            plt.figure(figsize=(10, 5))
+            plt.plot(worst_pred, label='worst_pred')
+            plt.plot(worst_gts, label='worst_gts')
+            plt.legend()
+            plt.show()
+
+            print('Best clip accuracy: {}'.format(maxCorrect))
+            print('Worst clip accuracy: {}'.format(minCorrect))
 
             acc = (correct / (size * frame_size)) * 100
             print(f"Accuracy completed: {acc}")
