@@ -41,11 +41,13 @@ if __name__ == '__main__':
     # iterate through all combinations
     for step_size, hidden_size, number_layers in lr_step_size_frame_filter:
         
+        #Create Tensorboard file named as hyperparameters
         writer = SummaryWriter(f"runs/hiddensize_{hidden_size}_step_size_{step_size}_numberlayer{number_layers}")
         
         if frame_count_prev == frame_count and step_size_prev == step_size:
             print('Same parameters "frame_size" and "step_size" skipping')
         else:
+            #Load train,val,test data
             train = HDF5Dataset(file_path='data', group='train', device=device, frame_count=frame_count,
                                 step_size=step_size)
             val = HDF5Dataset(file_path='data', group='val', device=device, frame_count=frame_count,
@@ -73,6 +75,7 @@ if __name__ == '__main__':
             print("Model Parameters: "+str(m.num_params(model)))
             loss_fn = nn.CrossEntropyLoss()
             optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+            #adjusts the learning rate between epochs
             lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, verbose=True, patience=5)
             trainer = t.Trainer(model, loss_fn, optimizer, epochs=epochs, train_dataloader=training_loader, \
                                 val_dataloader=val_loader, device=device, writer=writer,lr=lr_scheduler)
