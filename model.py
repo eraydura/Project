@@ -8,8 +8,7 @@ from torchvision.models import  resnet152
 def num_params(net):
     count = sum(p.numel() for p in net.parameters())
     return count
-"""
-Old Models
+
 
 class RNN(nn.Module):
     def __init__(self, input_dim,output_size,lstm=False,hidden_dim=64):
@@ -38,7 +37,8 @@ class RNN(nn.Module):
             output, _ = self.gru(x)
         x = F.relu(self.linear(output))
         return x
-
+"""
+Old Models
 class RNN_Attention(nn.Module):
     def __init__(self,input_dim,output_size,hidden_dim=64 ,lstm=False, embedding_dim=2):
         super(RNN_Attention, self,).__init__()
